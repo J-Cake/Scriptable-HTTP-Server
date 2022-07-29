@@ -17,7 +17,7 @@ export type HTTPRequest = {
 };
 
 export interface HTTPHandler {
-    default: (ans: HTTPRequest) => AsyncGenerator<Buffer | string>
+    default: (ans: HTTPRequest) => AsyncIterable<Buffer | string>
 }
 
 export const handlerCache: Map<string, HTTPHandler> = new Map();
@@ -31,7 +31,7 @@ export const toAbs = (path: string): string => (path ? (({
     .replaceAll(/^\.\./g, '')
 
 export default async function resolveHandler(handler: string): Promise<HTTPHandler> {
-    for (const i of config.get().roots.map(i => toAbs(i))) {
+    for (const i of config.get().roots.map((i: string) => toAbs(i))) {
         if (handlerCache.has(i))
             return handlerCache.get(i)!;
 

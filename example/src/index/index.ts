@@ -1,9 +1,8 @@
 /// <reference path="../../../def.d.ts" />
+import cp from 'node:child_process';
 
-export default async function*(req: HTTPRequest): AsyncGenerator<string> {
-    yield "<html>";
+export default function(req: HTTPRequest): AsyncIterable<string> {
+    req.status(200);
     
-    yield "Hi";
-    
-    yield "</html>";
+    return cp.exec('git status').stdout!;
 }
