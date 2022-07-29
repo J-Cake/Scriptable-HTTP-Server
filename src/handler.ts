@@ -40,11 +40,11 @@ export default async function resolveHandler(request: string): Promise<HTTPHandl
         const path = clean(`${i}/${clean(request)}`);
 
         if (handlerCache.has(path)) {
-            log.debug(`Reusing handler for ${chalk.yellow(path)}`);
+            log.debug(`Reusing scriptlet for ${chalk.yellow(path)}`);
             return handlerCache.get(path)!;
         }
 
-        log.debug(`Loading handler for ${chalk.yellow(path)}`);
+        log.debug(`Loading scriptlet for ${chalk.yellow(path)}`);
 
         const stat = await fs.stat(path).catch(() => null);
         if (!stat)
@@ -73,13 +73,15 @@ export default async function resolveHandler(request: string): Promise<HTTPHandl
             return handlerCache.get(`${path}/index.js`)!;
         }
     }
-    
-    log.debug(`No scriptlet found for ${request}`);
+
+    log.debug(`No scriptlet found for ${chalk.yellow(request)}`);
 
     for (const i of config.get().static.map((i: string) => toAbs(i))) {
         const path = clean(`${i}/${clean(request)}`);
-        if (handlerCache.has(path))
+        if (handlerCache.has(path)) {
+            log.debug(`Reusing scriptlet for ${chalk.yellow(path)}`);
             return handlerCache.get(path)!;
+        }
 
         if (await fs.stat(path).then(stat => !stat.isDirectory()).catch(() => false)) {
             handlerCache.set(path, staticHandler.bind({ basePath: i }));
