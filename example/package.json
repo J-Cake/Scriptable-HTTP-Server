@@ -1,0 +1,14 @@
+ 
+{
+    "name": "example-http-server",
+    "type": "module",
+    "dependencies": {
+        "chalk": "latest",
+        "@j-cake/jcake-utils": "latest"
+    },
+    "devDependencies": {
+        "@j-cake/mkjson": "latest",
+        "esbuild": "latest",
+        "typescript": "latest"
+    }
+}

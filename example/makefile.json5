@@ -1,0 +1,11 @@
+{
+    env: {
+        PATH: "echo $PWD/node_modules/.bin:$PATH"
+    },
+    targets: {
+        'build/index.js': {
+            dependencies: ['src/index/*.ts'],
+            run: "esbuild src/index/index.ts --outfile=build/index.js --bundle --sourcemap --format=esm --platform=node"
+        }
+    }
+} 

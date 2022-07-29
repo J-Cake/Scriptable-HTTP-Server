@@ -22,13 +22,13 @@ export interface HTTPHandler {
 
 export const handlerCache: Map<string, HTTPHandler> = new Map();
 
-export const toAbs = (path: string): string => (({
+export const toAbs = (path: string): string => (path ? (({
     '~': (path: string) => `${os.homedir()}/${path.slice(1)}`,
     '/': (path: string) => path
-})[['~/', '/'].find(i => path.startsWith(i))!]!?.(path) ?? `${process.cwd()}/${path}`)
+})[['~/', '/'].find(i => path.startsWith(i))!]!?.(path) ?? `${process.cwd()}/${path}`) : '/')
     .replaceAll('./', '')
-    .replaceAll(/[^\/]*\/\.\.\//, '')
-    .replaceAll(/^\.\./, '')
+    .replaceAll(/[^\/]*\/\.\.\//g, '')
+    .replaceAll(/^\.\./g, '')
 
 export default async function resolveHandler(handler: string): Promise<HTTPHandler> {
     for (const i of config.get().roots.map(i => toAbs(i))) {
@@ -37,6 +37,9 @@ export default async function resolveHandler(handler: string): Promise<HTTPHandl
 
         if (await fs.stat(i).then(stat => !stat.isDirectory()).catch(() => false)) {
             handlerCache.set(i, await import(i));
+            return handlerCache.get(i)!;
+        } else if (await fs.stat(`${i}/index.js`).then(stat => !stat.isDirectory()).catch(() => false)) {
+            handlerCache.set(i, await import(`${i}/index.js`));
             return handlerCache.get(i)!;
         }
     }

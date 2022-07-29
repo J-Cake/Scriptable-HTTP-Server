@@ -36,7 +36,7 @@ export default async function main(argv: string[]): Promise<boolean> {
             config.setState(prev => ({ static: [...prev.static, next()] }));
     
         else
-            config.setState(prev => ({ roots: [...prev.roots, next()] }))
+            config.setState(prev => ({ roots: [...prev.roots, i as string] }))
     
     const {default: Server} = await import('./server.js');
     return await Server(config.get().port);

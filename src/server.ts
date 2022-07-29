@@ -48,8 +48,8 @@ export default function Serve(port: number): Promise<boolean> {
             const handler = await resolveHandler(url.pathname ?? '/')
                 .catch((err: { code: number, err: string }) => {
                     log.err(err);
-                    res.writeHead(err.code, { 'content-type': 'text/plain' });
-                    res.end(stripAnsi(err.err));
+                    res.writeHead(err.code ?? 404, { 'content-type': 'text/plain' });
+                    res.end(stripAnsi(err.err ?? ''));
                 });
 
             if (!handler)
@@ -57,7 +57,7 @@ export default function Serve(port: number): Promise<boolean> {
 
             let handlerInstance: any;
             stream.Readable.from(handler.default(handlerInstance = {
-                getHeader: (header: string) => Object.entries(req.headers).find(([a, i]) => a.toLowerCase() == header.toLowerCase())?.[1] ?? '',
+                getHeader: (header: string) => Object.entries(req.headers).find(([a]) => a.toLowerCase() == header.toLowerCase())?.[1] ?? '',
                 url,
                 header: (name: string, ...values: string[]) => res.setHeader(name, values.join(';')) && handlerInstance,
                 status: (status: number) => res.writeHead(status) && handlerInstance,
