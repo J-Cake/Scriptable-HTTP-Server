@@ -6,9 +6,21 @@ import log from './log.js';
 
 type LogLevel = keyof typeof log;
 
-export const config: State<{ logLevel: LogLevel }> = new State({
-    logLevel: 'info' as LogLevel
+export interface ArgV {
+    logLevel: LogLevel,
+    port: number,
+    roots: string[],
+    static: string[]
+}
+
+export const config: State<ArgV> = new State({
+    logLevel: 'request' as LogLevel,
+    port: 80,
+    roots: [] as string[],
+    static: [] as string[]
 });
+
+export declare type Nullable<T> = T | null | undefined;
 
 export default async function main(argv: string[]): Promise<boolean> {
     const logLevel = Format.oneOf(Object.keys(log) as LogLevel[], false);
@@ -17,5 +29,15 @@ export default async function main(argv: string[]): Promise<boolean> {
         if (i == '--log-level')
             config.setState({ logLevel: logLevel(next()) });
 
-    return true;
+        else if (i == '--port' || i == '-p')
+            config.setState({ port: Number(next()) });
+    
+        else if (i == '--static' || i == '-s')
+            config.setState(prev => ({ static: [...prev.static, next()] }));
+    
+        else
+            config.setState(prev => ({ roots: [...prev.roots, next()] }))
+    
+    const {default: Server} = await import('./server.js');
+    return await Server(config.get().port);
 }

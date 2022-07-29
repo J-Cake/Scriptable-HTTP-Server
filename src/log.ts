@@ -33,8 +33,9 @@ export function stderr(tag: string, ...msg: any[]): void {
 }
 
 export default {
-    err: (...arg: any[]) => void     (['err', 'info', 'verbose', 'debug'].includes(config.get().logLevel) && stderr(chalk.grey(`[${chalk.red('Error')}]`), ...arg)),
-    info: (...arg: any[]) => void    (['info', 'verbose', 'debug'].includes(config.get().logLevel) && stdout(chalk.grey(`[${chalk.blue('Info')}]`), ...arg)),
+    err: (...arg: any[]) => void     (['err', 'info', 'request', 'verbose', 'debug'].includes(config.get().logLevel) && stderr(chalk.grey(`[${chalk.red('Error')}]`), ...arg)),
+    info: (...arg: any[]) => void    (['info', 'request', 'verbose', 'debug'].includes(config.get().logLevel) && stdout(chalk.grey(`[${chalk.blue('Info')}]`), ...arg)),
+    request: (...arg: any[]) => void    (['request', 'verbose', 'debug'].includes(config.get().logLevel) && stdout(chalk.grey(`[${chalk.magenta('Request')}]`), ...arg)),
     verbose: (...arg: any[]) => void (['verbose', 'debug'].includes(config.get().logLevel) && stdout(chalk.grey(`[${chalk.yellow('Verbose')}]`), ...arg)),
     debug: (...arg: any[]) => void   (['debug'].includes(config.get().logLevel) && stdout(chalk.grey(`[${chalk.cyan('Debug')}]`), ...arg))
 }
