@@ -54,16 +54,24 @@ export default function Serve(port: number): Promise<boolean> {
 
             if (!handler)
                 return;
+            
+            const x: typeof handler = async function*(): AsyncGenerator<Buffer> {
+                
+            }
 
-            let handlerInstance: any;
-            stream.Readable.from(handler.default(handlerInstance = {
-                getHeader: (header: string) => Object.entries(req.headers).find(([a]) => a.toLowerCase() == header.toLowerCase())?.[1] ?? '',
-                url,
-                header: (name: string, ...values: string[]) => res.setHeader(name, values.join(';')) && handlerInstance,
-                status: (status: number) => res.writeHead(status) && handlerInstance,
-                method: req.method!,
-                request: () => req
-            })).pipe(res);
+            try {
+                let handlerInstance: any;
+                stream.Readable.from(await handler(handlerInstance = {
+                    getHeader: (header: string) => Object.entries(req.headers).find(([a]) => a.toLowerCase() == header.toLowerCase())?.[1] ?? '',
+                    url,
+                    header: (name: string, ...values: string[]) => res.setHeader(name, values.join(';')) && handlerInstance,
+                    status: (status: number) => res.writeHead(status) && handlerInstance,
+                    method: req.method!,
+                    request: () => req
+                })).pipe(res);
+            } catch (err) {
+                log.err(err);
+            }
         });
 
         server.listen(port, () => log.info(`Server listening on port ${chalk.yellow(port)}`));

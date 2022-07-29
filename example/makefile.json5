@@ -1,11 +1,16 @@
 {
     env: {
-        PATH: "echo $PWD/node_modules/.bin:$PATH"
+        PATH: "echo $PWD/node_modules/.bin:$PATH",
+	esbuild: "echo --bundle --sourcemap --format=esm --platform=node"
     },
     targets: {
         'build/index.js': {
             dependencies: ['src/index/*.ts'],
-            run: "esbuild src/index/index.ts --outfile=build/index.js --bundle --sourcemap --format=esm --platform=node"
-        }
+            run: "esbuild src/index/index.ts --outfile=build/index.js $esbuild"
+        },
+	'build/example2.js': {
+	    dependencies: ['src/example2/*.ts'],
+	    run: "esbuild src/example2/index.ts --outfile=build/example2.js $esbuild"
+	}
     }
 } 

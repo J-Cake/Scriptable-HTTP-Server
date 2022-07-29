@@ -16,7 +16,7 @@
         "#app": "./build/index.js"
     },
     "scripts": {
-        "example": "node --enable-source-maps=true . --port 1920 example/build"
+        "example": "node --enable-source-maps=true . --port 1920 example/build -s example/static"
     },
     "deploy": {
         "main": "run.js",
