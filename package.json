@@ -1,7 +1,9 @@
 {
-    "name": "scriptlet",
-    "main": "./build/run.js",
+    "name": "@j-cake/scriptlet",
+    "main": "build/run.js",
     "type": "module",
+    "version": "0.1.0",
+    "bin": "build/run.js",
     "dependencies": {
         "@j-cake/jcake-utils": "latest",
         "chalk": "latest"
@@ -20,6 +22,7 @@
     },
     "deploy": {
         "main": "run.js",
+        "bin": "run.js",
         "imports": {
             "#app": "./index.js"
         }
