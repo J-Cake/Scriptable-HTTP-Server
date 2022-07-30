@@ -39,7 +39,7 @@ export default async function resolveHandler(request: string): Promise<HTTPHandl
     for (const i of config.get().roots.map((i: string) => toAbs(i))) {
         const path = clean(`${i}/${clean(request)}`);
 
-        if (handlerCache.has(path)) {
+        if (handlerCache.has(path) && !config.get().devMode) {
             log.debug(`Reusing scriptlet for ${chalk.yellow(path)}`);
             return handlerCache.get(path)!;
         }
@@ -55,22 +55,23 @@ export default async function resolveHandler(request: string): Promise<HTTPHandl
             if (cacheable !== false)
                 handlerCache.set(path, handler);
 
-            return handlerCache.get(path)!;
+            return handler;
         } else {
-            const stat = await fs.stat(`${path}/index.js`).catch(() => null);
+            const coalesce = clean(`${path}/index.js`)
+            const stat = await fs.stat(coalesce).catch(() => null);
             if (!stat || stat.isDirectory())
                 continue;
 
-            log.debug(`Coalesce to ${chalk.yellow(`${path}/index.js`)}`);
+            log.debug(`Coalesce to ${chalk.yellow(coalesce)}`);
 
-            const { default: handler, cacheable } = await import(`${path}/index.js`).then(handler => handler.default);
+            const { default: handler, cacheable } = await import(coalesce);
 
             if (cacheable !== false) {
                 handlerCache.set(path, handler); // only cache `handler` because `handler`/index.js` is resolved to `handler`
-                handlerCache.set(`${path}/index.js`, handler); // only cache `handler` because `handler`/index.js` is resolved to `handler`
+                handlerCache.set(coalesce, handler); // only cache `handler` because `handler`/index.js` is resolved to `handler`
             }
-
-            return handlerCache.get(`${path}/index.js`)!;
+            
+            return handler;
         }
     }
 
@@ -78,7 +79,7 @@ export default async function resolveHandler(request: string): Promise<HTTPHandl
 
     for (const i of config.get().static.map((i: string) => toAbs(i))) {
         const path = clean(`${i}/${clean(request)}`);
-        if (handlerCache.has(path)) {
+        if (handlerCache.has(path) && !config.get().devMode) {
             log.debug(`Reusing scriptlet for ${chalk.yellow(path)}`);
             return handlerCache.get(path)!;
         }

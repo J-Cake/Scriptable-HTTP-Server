@@ -1,5 +1,5 @@
 {
-    "name": "@j-cake/scriptlet",
+    "name": "scriptlet",
     "main": "build/run.js",
     "type": "module",
     "version": "0.1.0",

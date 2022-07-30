@@ -2,9 +2,11 @@ import http from 'node:http';
 import urllib from 'node:url';
 import stream from 'node:stream';
 import chalk from 'chalk';
+import {iter} from '@j-cake/jcake-utils/iter';
 
 import log, { stripAnsi } from './log.js';
 import resolveHandler from './handler.js';
+import { config } from './index.js';
 
 export const finishLogger = (req: http.IncomingMessage, res: http.ServerResponse) =>
     res.on('finish', function() {
@@ -45,19 +47,34 @@ export const finishLogger = (req: http.IncomingMessage, res: http.ServerResponse
 export default function Serve(port: number): Promise<boolean> {
     return new Promise<boolean>(async function(ok, error) {
         const server = http.createServer(async function(req: http.IncomingMessage, res: http.ServerResponse) {
+            res.setHeader('content-type', 'text/plain' );
+            
             const url = new urllib.URL(req.url ?? '/', `http://localhost:${port}`);
             req.url = url as any;
             finishLogger(req, res);
 
-            const handler = await resolveHandler(url.pathname ?? '/')
+            let handler = await resolveHandler(url.pathname ?? '/')
                 .catch((err: { code: number, err: string }) => {
                     log.err(err);
                     res.writeHead(err.code ?? 404, { 'content-type': 'text/plain' });
                     res.end(stripAnsi(err.err ?? ''));
                 });
 
-            if (!handler)
-                return;
+            if (!handler) {
+                handler = await resolveHandler(config.get().errors[404])
+                    .catch((err: { code: number, err: string }) => {
+                        log.err(err);
+                        res.writeHead(err.code ?? 404, { 'content-type': 'text/plain' });
+                        res.end(stripAnsi(err.err ?? ''));
+                    });
+
+                if (!handler) {
+                    res.statusCode = 404;
+                    res.end(`Error 404: ${url.pathname} was not found.`);
+                    
+                    return;
+                }
+            }
 
             try {
                 const handlerInstance: any = {
@@ -68,6 +85,7 @@ export default function Serve(port: number): Promise<boolean> {
                     method: req.method!,
                     request: () => req
                 };
+
                 const response = await handler(handlerInstance);
 
                 stream.Readable.from(response).pipe(res);
