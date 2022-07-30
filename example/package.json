@@ -7,7 +7,6 @@
         "@j-cake/jcake-utils": "latest"
     },
     "devDependencies": {
-        "@j-cake/mkjson": "latest",
         "esbuild": "latest",
         "typescript": "latest"
     }
